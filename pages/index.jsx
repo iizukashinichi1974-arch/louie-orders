@@ -2036,9 +2036,15 @@ export default function InventoryTracker() {
     persist(next);
   }
 
-  function isDualUseItem(item) {
-    return item.maker === "YAY" || item.maker === "ナインヤーズ";
+    function isDualUseItem(item) {
+    return (
+      item.maker === "YAY" ||
+      item.maker === "ナインヤーズ" ||
+      item.type === "エトラス" ||
+      item.type === "ナイン"
+    );
   }
+
 
   function adjustStockDual(id, usageType) {
     const next = structuredClone(data);
