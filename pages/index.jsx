@@ -882,6 +882,54 @@ export default function InventoryTracker() {
           }
         }
         {
+          const s = "VAN";
+          if (merged[s] && merged[s].straight) {
+            const vanStraight = merged[s].straight;
+            let kf = vanStraight.makers.find((mm) => mm.name === "ケラフェクト");
+            if (!kf) {
+              kf = mk("ケラフェクト", ["1剤", "2剤"]);
+              vanStraight.makers.push(kf);
+              migrated = true;
+            } else {
+              ["1剤", "2剤"].forEach((t) => {
+                if (!kf.types.includes(t)) {
+                  kf.types.push(t);
+                  migrated = true;
+                }
+              });
+            }
+            const kfItems = [
+              { id: "kf8", type: "1剤", name: "ケラフェクト8", price: 6120 },
+              { id: "kf65", type: "1剤", name: "ケラフェクト6.5", price: 6120 },
+              { id: "kf55", type: "1剤", name: "ケラフェクト5.5", price: 6120 },
+              { id: "kf45", type: "1剤", name: "ケラフェクト4.5", price: 6120 },
+              { id: "kf0", type: "1剤", name: "ケラフェクト0", price: 4500 },
+              { id: "kfgconk", type: "1剤", name: "ケラフェクトG-コンク", price: 4950 },
+              { id: "kf2zai", type: "2剤", name: "ケラフェクト2剤", price: 3420 },
+            ];
+            kfItems.forEach((ki) => {
+              if (!vanStraight.items.some((i) => i.maker === "ケラフェクト" && i.name === ki.name)) {
+                vanStraight.items.push({
+                  id: ki.id,
+                  maker: "ケラフェクト",
+                  type: ki.type,
+                  name: ki.name,
+                  stock: 2,
+                  par: 2,
+                  unit: "本",
+                  color: "",
+                  price: ki.price,
+                  used: 0,
+                  usedGyomu: 0,
+                  usedTenhan: 0,
+                  usage: "業務",
+                });
+                migrated = true;
+              }
+            });
+          }
+        }
+        {
           const louieOld = oldLouieData;
           const alreadyImported = !!(merged.VAN && merged.VAN._importedFromLouie);
           if (louieOld && !alreadyImported) {
