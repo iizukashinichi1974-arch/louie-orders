@@ -2463,7 +2463,9 @@ export default function InventoryTracker() {
       const catData = data[store][c.key];
       if (!catData) return;
       catData.items.forEach((i) => {
-        if ((i.used || 0) > 0 && supplierForMaker(i.maker) === supplier) {
+        const hasUsage =
+          (i.used || 0) > 0 || (i.usedGyomu || 0) > 0 || (i.usedTenhan || 0) > 0;
+        if (hasUsage && supplierForMaker(i.maker) === supplier) {
           results.push({ ...i, categoryKey: c.key, categoryLabel: c.label });
         }
       });
@@ -2474,16 +2476,19 @@ export default function InventoryTracker() {
   function confirmSupplierOrder(supplier) {
     const items = getSupplierUsedItems(supplier);
     if (items.length === 0) return;
-    const recordItems = items.map((i) => ({
-      maker: i.maker,
-      type: i.type,
-      name: i.name,
-      qty: i.used,
-      unit: i.unit,
-      price: i.price || 0,
-      subtotal: i.used * (i.price || 0),
-      categoryLabel: i.categoryLabel,
-    }));
+    const recordItems = items.map((i) => {
+      const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0);
+      return {
+        maker: i.maker,
+        type: i.type,
+        name: i.name,
+        qty,
+        unit: i.unit,
+        price: i.price || 0,
+        subtotal: qty * (i.price || 0),
+        categoryLabel: i.categoryLabel,
+      };
+    });
     const total = recordItems.reduce((sum, i) => sum + i.subtotal, 0);
     const next = structuredClone(data);
     if (!Array.isArray(next[store].orderHistory)) next[store].orderHistory = [];
@@ -2502,7 +2507,11 @@ export default function InventoryTracker() {
     });
     Object.keys(orderedByCategory).forEach((ck) => {
       next[store][ck].items.forEach((i) => {
-        if (orderedByCategory[ck].has(i.id)) i.used = 0;
+        if (orderedByCategory[ck].has(i.id)) {
+          i.used = 0;
+          i.usedGyomu = 0;
+          i.usedTenhan = 0;
+        }
       });
     });
     persist(next);
