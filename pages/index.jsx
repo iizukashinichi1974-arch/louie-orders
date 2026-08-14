@@ -2511,6 +2511,7 @@ export default function InventoryTracker() {
           i.used = 0;
           i.usedGyomu = 0;
           i.usedTenhan = 0;
+          i.stock = i.par;
         }
       });
     });
