@@ -771,6 +771,7 @@ export default function InventoryTracker() {
               : (DEFAULT_DATA[s] && DEFAULT_DATA[s].manualMonthly) || [];
           merged[s]._colorSchemeFixed = !!(parsed[s] && parsed[s]._colorSchemeFixed);
           merged[s]._importedFromLouie = !!(parsed[s] && parsed[s]._importedFromLouie);
+          merged[s]._stockParSyncedOnce = !!(parsed[s] && parsed[s]._stockParSyncedOnce);
           for (const c of CATEGORIES) {
             const fallback = (DEFAULT_DATA[s] && DEFAULT_DATA[s][c.key]) || emptyCategory();
             const existing = parsed[s] && parsed[s][c.key];
@@ -930,19 +931,25 @@ export default function InventoryTracker() {
           }
         }
         {
-          STORES.forEach((s) => {
-            CATEGORIES.forEach((c) => {
-              const catData = merged[s] && merged[s][c.key];
-              if (!catData) return;
-              catData.items.forEach((i) => {
-                if ((i.par || 0) <= 1) {
-                  i.par = 2;
-                  i.stock = 2;
-                  migrated = true;
-                }
+          const alreadyStockSynced = !!(merged.VAN && merged.VAN._stockParSyncedOnce);
+          if (!alreadyStockSynced) {
+            STORES.forEach((s) => {
+              CATEGORIES.forEach((c) => {
+                const catData = merged[s] && merged[s][c.key];
+                if (!catData) return;
+                catData.items.forEach((i) => {
+                  if ((i.par || 0) === 0) {
+                    i.par = 2;
+                    i.stock = 2;
+                  } else {
+                    i.stock = i.par;
+                  }
+                });
               });
             });
-          });
+            if (merged.VAN) merged.VAN._stockParSyncedOnce = true;
+            migrated = true;
+          }
         }
         {
           const louieOld = oldLouieData;
