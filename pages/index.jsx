@@ -937,6 +937,7 @@ export default function InventoryTracker() {
               catData.items.forEach((i) => {
                 if ((i.par || 0) <= 1) {
                   i.par = 2;
+                  i.stock = 2;
                   migrated = true;
                 }
               });
