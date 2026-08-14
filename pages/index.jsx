@@ -935,8 +935,8 @@ export default function InventoryTracker() {
               const catData = merged[s] && merged[s][c.key];
               if (!catData) return;
               catData.items.forEach((i) => {
-                if ((i.par || 0) === 0) {
-                  i.par = 1;
+                if ((i.par || 0) <= 1) {
+                  i.par = 2;
                   migrated = true;
                 }
               });
