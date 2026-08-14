@@ -930,6 +930,20 @@ export default function InventoryTracker() {
           }
         }
         {
+          STORES.forEach((s) => {
+            CATEGORIES.forEach((c) => {
+              const catData = merged[s] && merged[s][c.key];
+              if (!catData) return;
+              catData.items.forEach((i) => {
+                if ((i.par || 0) === 0) {
+                  i.par = 1;
+                  migrated = true;
+                }
+              });
+            });
+          });
+        }
+        {
           const louieOld = oldLouieData;
           const alreadyImported = !!(merged.VAN && merged.VAN._importedFromLouie);
           if (louieOld && !alreadyImported) {
