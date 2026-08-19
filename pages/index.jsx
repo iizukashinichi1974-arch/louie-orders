@@ -2250,12 +2250,23 @@ export default function InventoryTracker() {
     const next = structuredClone(data);
     const item = next[store][category].items.find((i) => i.id === id);
     if (item) {
-      item.stock = Math.max(0, item.stock + delta);
+      const par = item.par || 0;
+      const newStock = Math.max(0, (item.stock || 0) + delta);
       if (delta < 0) {
-        item.used = (item.used || 0) + 1;
+        // 基準数を下回った分だけ発注対象としてカウントする
+        if (newStock < par) {
+          item.used = (item.used || 0) + 1;
+        }
       } else if (delta > 0) {
-        item.used = Math.max(0, (item.used || 0) - 1);
+        if ((item.used || 0) > 0) {
+          // 直前のマイナス操作の取り消し（発注対象からは外す）
+          item.used = item.used - 1;
+        } else {
+          // 基準数を超えて意図的に買い足した分は発注実績としてカウントする
+          item.used = (item.used || 0) + 1;
+        }
       }
+      item.stock = newStock;
     }
     persist(next);
   }
