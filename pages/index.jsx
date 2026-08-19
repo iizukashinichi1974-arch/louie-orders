@@ -2498,8 +2498,10 @@ export default function InventoryTracker() {
   function confirmSupplierOrder(supplier) {
     const items = getSupplierUsedItems(supplier);
     if (items.length === 0) return;
+    const qtyById = {};
     const recordItems = items.map((i) => {
       const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0);
+      qtyById[i.id] = qty;
       return {
         maker: i.maker,
         type: i.type,
@@ -2533,7 +2535,7 @@ export default function InventoryTracker() {
           i.used = 0;
           i.usedGyomu = 0;
           i.usedTenhan = 0;
-          i.stock = i.par;
+          i.stock = (i.stock || 0) + (qtyById[i.id] || 0);
         }
       });
     });
@@ -2599,12 +2601,16 @@ export default function InventoryTracker() {
       total,
     });
     const orderedIds = new Set(items.map((i) => i.id));
+    const orderQtyById = {};
+    items.forEach((i) => {
+      orderQtyById[i.id] = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0);
+    });
     next[store][category].items.forEach((i) => {
       if (orderedIds.has(i.id)) {
         i.used = 0;
         i.usedGyomu = 0;
         i.usedTenhan = 0;
-        i.stock = i.par;
+        i.stock = (i.stock || 0) + (orderQtyById[i.id] || 0);
       }
     });
     persist(next);
