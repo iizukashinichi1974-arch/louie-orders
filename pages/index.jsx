@@ -2251,22 +2251,29 @@ export default function InventoryTracker() {
     const item = next[store][category].items.find((i) => i.id === id);
     if (item) {
       const par = item.par || 0;
+      let shortfall = item.used || 0;
+      let surplus = item.surplusOrdered || 0;
       const newStock = Math.max(0, (item.stock || 0) + delta);
       if (delta < 0) {
-        // 基準数を下回った分だけ発注対象としてカウントする
-        if (newStock < par) {
-          item.used = (item.used || 0) + 1;
+        if (surplus > 0) {
+          // 買い足した余剰分を消費しているだけなので発注対象にはしない
+          surplus -= 1;
+        } else if (newStock < par) {
+          // 基準数を下回った分だけ発注対象としてカウントする
+          shortfall += 1;
         }
       } else if (delta > 0) {
-        if ((item.used || 0) > 0) {
-          // 直前のマイナス操作の取り消し（発注対象からは外す）
-          item.used = item.used - 1;
+        if (shortfall > 0) {
+          // 直前のマイナス操作（不足カウント）の取り消し
+          shortfall -= 1;
         } else {
           // 基準数を超えて意図的に買い足した分は発注実績としてカウントする
-          item.used = (item.used || 0) + 1;
+          surplus += 1;
         }
       }
       item.stock = newStock;
+      item.used = shortfall;
+      item.surplusOrdered = surplus;
     }
     persist(next);
   }
@@ -2497,7 +2504,10 @@ export default function InventoryTracker() {
       if (!catData) return;
       catData.items.forEach((i) => {
         const hasUsage =
-          (i.used || 0) > 0 || (i.usedGyomu || 0) > 0 || (i.usedTenhan || 0) > 0;
+          (i.used || 0) > 0 ||
+          (i.usedGyomu || 0) > 0 ||
+          (i.usedTenhan || 0) > 0 ||
+          (i.surplusOrdered || 0) > 0;
         if (hasUsage && supplierForMaker(i.maker) === supplier) {
           results.push({ ...i, categoryKey: c.key, categoryLabel: c.label });
         }
@@ -2509,10 +2519,12 @@ export default function InventoryTracker() {
   function confirmSupplierOrder(supplier) {
     const items = getSupplierUsedItems(supplier);
     if (items.length === 0) return;
-    const qtyById = {};
+    const stockDeltaById = {};
     const recordItems = items.map((i) => {
-      const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0);
-      qtyById[i.id] = qty;
+      const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0) + (i.surplusOrdered || 0);
+      // 在庫への加算は「不足分」のみ。買い足し分(surplusOrdered)は+ボタン操作時点で
+      // すでに在庫数へ反映済みのため、ここで再度加算すると二重カウントになる。
+      stockDeltaById[i.id] = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0);
       return {
         maker: i.maker,
         type: i.type,
@@ -2546,7 +2558,8 @@ export default function InventoryTracker() {
           i.used = 0;
           i.usedGyomu = 0;
           i.usedTenhan = 0;
-          i.stock = (i.stock || 0) + (qtyById[i.id] || 0);
+          i.surplusOrdered = 0;
+          i.stock = (i.stock || 0) + (stockDeltaById[i.id] || 0);
         }
       });
     });
@@ -2557,7 +2570,11 @@ export default function InventoryTracker() {
   function confirmOrder() {
     const catData = data[store][category];
     const items = catData.items.filter(
-      (i) => (i.used || 0) > 0 || (i.usedGyomu || 0) > 0 || (i.usedTenhan || 0) > 0
+      (i) =>
+        (i.used || 0) > 0 ||
+        (i.usedGyomu || 0) > 0 ||
+        (i.usedTenhan || 0) > 0 ||
+        (i.surplusOrdered || 0) > 0
     );
     if (items.length === 0) return;
     const recordItems = [];
@@ -2588,14 +2605,15 @@ export default function InventoryTracker() {
           });
         }
       } else {
+        const qty = (i.used || 0) + (i.surplusOrdered || 0);
         recordItems.push({
           maker: i.maker,
           type: i.type,
           name: i.name,
-          qty: i.used,
+          qty,
           unit: i.unit,
           price: i.price || 0,
-          subtotal: i.used * (i.price || 0),
+          subtotal: qty * (i.price || 0),
           usage: i.usage || "業務",
         });
       }
@@ -2614,6 +2632,8 @@ export default function InventoryTracker() {
     const orderedIds = new Set(items.map((i) => i.id));
     const orderQtyById = {};
     items.forEach((i) => {
+      // 在庫への加算は「不足分（used/usedGyomu/usedTenhan）」のみ。
+      // 買い足し分(surplusOrdered)は+ボタン操作時点ですでに在庫に反映済みのため対象外。
       orderQtyById[i.id] = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0);
     });
     next[store][category].items.forEach((i) => {
@@ -2621,6 +2641,7 @@ export default function InventoryTracker() {
         i.used = 0;
         i.usedGyomu = 0;
         i.usedTenhan = 0;
+        i.surplusOrdered = 0;
         i.stock = (i.stock || 0) + (orderQtyById[i.id] || 0);
       }
     });
@@ -3515,7 +3536,12 @@ export default function InventoryTracker() {
                               </span>
                               {item.used > 0 && (
                                 <span className="text-[9px] font-mono text-[#9D3B4A] leading-none">
-                                  使用{item.used}
+                                  不足{item.used}
+                                </span>
+                              )}
+                              {(item.surplusOrdered || 0) > 0 && (
+                                <span className="text-[9px] font-mono text-[#3B7A57] leading-none">
+                                  追加{item.surplusOrdered}
                                 </span>
                               )}
                             </div>
