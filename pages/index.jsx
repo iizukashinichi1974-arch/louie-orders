@@ -2318,7 +2318,7 @@ export default function InventoryTracker() {
 
   function openLiveOrderPreview() {
     const items = reorderItems.map((i) => {
-      const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0);
+      const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0) + (i.surplusOrdered || 0);
       return {
         maker: i.maker,
         type: i.type,
@@ -2336,7 +2336,7 @@ export default function InventoryTracker() {
   function openSupplierWideOrderPreview() {
     const usedItems = getSupplierUsedItems(store);
     const items = usedItems.map((i) => {
-      const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0);
+      const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0) + (i.surplusOrdered || 0);
       return {
         maker: i.maker,
         type: i.type,
@@ -2667,10 +2667,14 @@ export default function InventoryTracker() {
   const categoryData = data[store][category];
   const lowCount = categoryData.items.filter((i) => i.par > 0 && i.stock <= i.par * 0.34).length;
   const reorderItems = categoryData.items.filter(
-    (i) => (i.used || 0) > 0 || (i.usedGyomu || 0) > 0 || (i.usedTenhan || 0) > 0
+    (i) =>
+      (i.used || 0) > 0 ||
+      (i.usedGyomu || 0) > 0 ||
+      (i.usedTenhan || 0) > 0 ||
+      (i.surplusOrdered || 0) > 0
   );
   const reorderTotal = reorderItems.reduce((sum, i) => {
-    const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0);
+    const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0) + (i.surplusOrdered || 0);
     return sum + qty * (i.price || 0);
   }, 0);
   const orderHistory = data[store].orderHistory || [];
@@ -3079,7 +3083,7 @@ export default function InventoryTracker() {
           {showOrderPreview && (
             <div className="p-3 space-y-1.5">
               {reorderItems.map((i) => {
-                const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0);
+                const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0) + (i.surplusOrdered || 0);
                 return (
                   <div key={i.id} className="flex items-center justify-between text-[12px] font-mono">
                     <span className="text-[#5A5A5A] truncate">
