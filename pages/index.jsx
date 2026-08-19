@@ -56,6 +56,11 @@ function supplierForMaker(maker) {
   return SUPPLIER_MAP[maker] || "VAN";
 }
 
+const SERIES_DISPLAY_LABELS = {
+  ジーニアス: "ジーニアス1剤",
+  アイスタイル: "アイスタイル1剤",
+};
+
 function cat(makers, items) {
   return { makers, items };
 }
@@ -100,11 +105,11 @@ function makeSeriesItems(maker, seriesMap, prefix) {
 
 const HOYU_COLOR_SERIES = {
   プロマスター: [
-    "N-9/8", "N-8/7", "N-7/6", "N-6/5", "N-5/4", "N-4/3", "N-3/2", "N-2/1",
-    "MT-9/8", "MT-8/7", "MT-7/6", "MT-6/5", "MT-5/4",
+    "N-10/12", "N-10/10", "N-9/8", "N-8/7", "N-7/6", "N-6/5", "N-5/4", "N-4/3", "N-3/2", "N-2/1",
+    "MT-10/12", "MT-10/10", "MT-9/8", "MT-8/7", "MT-7/6", "MT-6/5", "MT-5/4",
     "M-9/9", "M-8/7", "M-7/6", "M-6/5",
     "R-9/8", "R-8/7", "R-7/6", "R-6/5", "R-10/12",
-    "C-10/12", "C-10/10", "C-9/9", "C-8/8", "C-7/7",
+    "C-10/12", "C-10/10", "C-9/9", "C-8/8", "C-7/7", "C-6/5",
     "A-9/8", "A-8/7", "A-7/6", "A-6/5",
     "V-8/7", "V-7/6", "V-6/5",
     "E BR6", "E BR-4", "E MV-8", "E CP-9", "E CR-7", "E CW-10", "E NA-3",
@@ -115,27 +120,29 @@ const HOYU_COLOR_SERIES = {
   ピグメント: [
     "N-8P", "N-7P", "N-6P", "N-4P",
     "MT-9P", "MT-8P", "MT-7P", "MT-6P", "MT-5P",
-    "M-8P",
+    "M-8P", "M-7P", "M-6P",
     "A-9P", "A-8P", "A-7P", "A-6P",
-    "E CR-7P", "CB-5P", "CL",
+    "V-9P", "V-8P", "V-7P", "V-6P",
+    "E BR6P", "E BR-4P", "E CP-9P", "E CR-7P", "E NA-3P",
+    "CB-5P", "SV6P", "CL",
   ],
-  プロマスタートナーオン: ["MT-T9"],
+  プロマスタートナーオン: ["MT-T9", "A-T7"],
   アプリエ: [
     "PA-11", "PA-13", "PA-15",
     "BA-11", "BA-13", "BA-15",
     "OG-11", "OG-13", "OG-15",
-    "LA-11", "LA-13",
+    "LA-11", "LA-13", "LA-15",
     "MB-11", "MB-13", "MB-15",
-    "SG-11", "SG-13",
+    "SG-11", "SG-13", "SG-15",
     "BP-11", "BP-13", "BP-15",
     "BLUE", "GREEN", "VIOLET", "ORANGE", "L/T",
     "ACケアージュ", "PCパウダー",
   ],
-  PMアプリエミドル: ["LA9", "LA7", "LA6", "MC9", "MC7", "MC6", "BE9", "MA9", "MA6"],
+  PMアプリエミドル: ["BA9", "BA7", "BA6", "LA9", "LA7", "LA6", "MC9", "MC7", "MC6", "BE9", "BE7", "BE5", "MA9", "MA7", "MA6"],
   PMアプリエグロー: [
-    "CO G8", "CO G9", "CO G10",
-    "SM A8", "SM A9", "SM A10", "SM A11", "SM G9",
-    "NA G10", "SO L9",
+    "CO G8", "CO G9", "CO G10", "CO G11",
+    "SM A8", "SM A9", "SM A10", "SM A11", "SM G9", "SM G11",
+    "NA G10", "SO L9", "SO L11",
   ],
 };
 
@@ -157,7 +164,7 @@ const ORDEVE_SERIES = {
 };
 
 const HAIRIN_SERIES = {
-  ジーニアス: ["CA1", "TG3", "TG5", "TG7", "TG0EX", "GA6", "CY4", "CA0", "AC"],
+  ジーニアス: ["CA1", "TG3", "TG5", "TG7", "TG0EX", "CA6", "CY4", "CA0", "AC"],
   アイスタイル: ["CA-0", "CA-70", "C10"],
 };
 
@@ -225,7 +232,7 @@ const DEFAULT_DATA = {
     ),
     perm: emptyCategory(),
     straight: cat(
-      [mk("華凛", Object.keys(HAIRIN_SERIES))],
+      [mk("華凛", [...Object.keys(HAIRIN_SERIES), "2剤"]), mk("ケラフェクト", ["1剤", "2剤"])],
       [
         ...makeSeriesItems("華凛", HAIRIN_SERIES, "kr").map((i) => {
           const prices = {
@@ -239,10 +246,17 @@ const DEFAULT_DATA = {
             CA0: 1950,
             C10: 1600,
           };
-          return { ...i, price: prices[i.name] || 0 };
+          return { ...i, price: prices[i.name] || 0, stock: 2, par: 2 };
         }),
-        it("kr100", "華凛", "", "リキッド2剤 2L", 0, 0, "本", "", 3800),
-        it("kr101", "華凛", "", "クリーム2剤 2kg", 0, 0, "本", "", 5400),
+        it("kr100", "華凛", "2剤", "リキッド2剤 2L", 2, 2, "本", "", 3800),
+        it("kr101", "華凛", "2剤", "クリーム2剤 2kg", 2, 2, "本", "", 5400),
+        it("kf8", "ケラフェクト", "1剤", "ケラフェクト8", 2, 2, "本", "", 6120),
+        it("kf65", "ケラフェクト", "1剤", "ケラフェクト6.5", 2, 2, "本", "", 6120),
+        it("kf55", "ケラフェクト", "1剤", "ケラフェクト5.5", 2, 2, "本", "", 6120),
+        it("kf45", "ケラフェクト", "1剤", "ケラフェクト4.5", 2, 2, "本", "", 6120),
+        it("kf0", "ケラフェクト", "1剤", "ケラフェクト0", 2, 2, "本", "", 4500),
+        it("kf2zai", "ケラフェクト", "2剤", "ケラフェクト2剤", 2, 2, "本", "", 3420),
+        it("kfgconk", "ケラフェクト", "1剤", "ケラフェクトG-コンク", 2, 2, "本", "", 4950),
       ]
     ),
     manicure: cat(
@@ -357,12 +371,12 @@ const DEFAULT_DATA = {
     shampoo: cat(
       [mk("YAY", ["ボタニカルケア", "ダメージケア"])],
       [
-        it("yay_sh1", "YAY", "ボタニカルケア", "ボタニカルケアシャンプー 300ml", 0, 0, "本", "", 1479, 0, "店販"),
-        it("yay_sh2", "YAY", "ボタニカルケア", "ボタニカルケアシャンプー 500ml", 0, 0, "本", "", 1790, 0, "店販"),
-        it("yay_sh3", "YAY", "ボタニカルケア", "ボタニカルケアシャンプー 業務用1000ml", 0, 0, "本", "", 3340, 0, "業務"),
-        it("yay_sh4", "YAY", "ダメージケア", "ダメージケアシャンプー 300ml", 0, 0, "本", "", 1479, 0, "店販"),
-        it("yay_sh5", "YAY", "ダメージケア", "ダメージケアシャンプー 500ml", 0, 0, "本", "", 1790, 0, "店販"),
-        it("yay_sh6", "YAY", "ダメージケア", "ダメージケアシャンプー 業務用1000ml", 0, 0, "本", "", 3340, 0, "業務"),
+        it("yay_sh1", "YAY", "ボタニカルケア", "ボタニカルケアシャンプー 300ml", 0, 0, "本", "", 1509, 0, "店販"),
+        it("yay_sh2", "YAY", "ボタニカルケア", "ボタニカルケアシャンプー 500ml", 0, 0, "本", "", 1830, 0, "店販"),
+        it("yay_sh3", "YAY", "ボタニカルケア", "ボタニカルケアシャンプー 業務用1000ml", 0, 0, "本", "", 3440, 0, "業務"),
+        it("yay_sh4", "YAY", "ダメージケア", "ダメージケアシャンプー 300ml", 0, 0, "本", "", 1569, 0, "店販"),
+        it("yay_sh5", "YAY", "ダメージケア", "ダメージケアシャンプー 500ml", 0, 0, "本", "", 1940, 0, "店販"),
+        it("yay_sh6", "YAY", "ダメージケア", "ダメージケアシャンプー 業務用1000ml", 0, 0, "本", "", 3640, 0, "業務"),
       ]
     ),
     treatment: emptyCategory(),
@@ -370,12 +384,12 @@ const DEFAULT_DATA = {
     conditioner: cat(
       [mk("YAY", ["ボタニカルケア", "ダメージケア"])],
       [
-        it("yay_co1", "YAY", "ボタニカルケア", "ボタニカルケアコンディショナー 300ml", 0, 0, "本", "", 1449, 0, "店販"),
-        it("yay_co2", "YAY", "ボタニカルケア", "ボタニカルケアコンディショナー 500ml", 0, 0, "本", "", 1730, 0, "店販"),
-        it("yay_co3", "YAY", "ボタニカルケア", "ボタニカルケアコンディショナー 業務用1000ml", 0, 0, "本", "", 3160, 0, "業務"),
-        it("yay_co4", "YAY", "ダメージケア", "ダメージコンディショナー 300ml", 0, 0, "本", "", 1449, 0, "店販"),
-        it("yay_co5", "YAY", "ダメージケア", "ダメージコンディショナー 500ml", 0, 0, "本", "", 1730, 0, "店販"),
-        it("yay_co6", "YAY", "ダメージケア", "ダメージコンディショナー 業務用1000ml", 0, 0, "本", "", 3160, 0, "業務"),
+        it("yay_co1", "YAY", "ボタニカルケア", "ボタニカルケアコンディショナー 300ml", 0, 0, "本", "", 1479, 0, "店販"),
+        it("yay_co2", "YAY", "ボタニカルケア", "ボタニカルケアコンディショナー 500ml", 0, 0, "本", "", 1780, 0, "店販"),
+        it("yay_co3", "YAY", "ボタニカルケア", "ボタニカルケアコンディショナー 業務用1000ml", 0, 0, "本", "", 3260, 0, "業務"),
+        it("yay_co4", "YAY", "ダメージケア", "ダメージコンディショナー 300ml", 0, 0, "本", "", 1479, 0, "店販"),
+        it("yay_co5", "YAY", "ダメージケア", "ダメージコンディショナー 500ml", 0, 0, "本", "", 1780, 0, "店販"),
+        it("yay_co6", "YAY", "ダメージケア", "ダメージコンディショナー 業務用1000ml", 0, 0, "本", "", 3260, 0, "業務"),
       ]
     ),
     haircare: cat(
@@ -383,13 +397,13 @@ const DEFAULT_DATA = {
       [
         it("yay_hc1", "YAY", "", "クリーム", 0, 0, "本", "", 1324, 0, "店販"),
         it("yay_hc2", "YAY", "", "ワックス", 0, 0, "本", "", 986, 0, "店販"),
-        it("yay_hc3", "YAY", "", "ジェルオイル", 0, 0, "本", "", 961, 0, "店販"),
-        it("yay_hc4", "YAY", "", "ユースオイル", 0, 0, "本", "", 1249, 0, "店販"),
-        it("yay_hc5", "YAY", "", "アンドミー", 0, 0, "本", "", 938, 0, "店販"),
-        it("yay_ny1", "ナインヤーズ", "", "cynトリートメント", 0, 0, "本", "", 6800, 0, "店販"),
-        it("yay_ny2", "ナインヤーズ", "", "ベースウォーター", 0, 0, "本", "", 1560, 0, "店販"),
-        it("yay_ny3", "ナインヤーズ", "", "yard(大)", 0, 0, "本", "", 983, 0, "店販"),
-        it("yay_ny4", "ナインヤーズ", "", "yard(小)", 0, 0, "本", "", 642, 0, "店販"),
+        it("yay_hc3", "YAY", "", "ジェルオイル", 0, 0, "本", "", 1006, 0, "店販"),
+        it("yay_hc4", "YAY", "", "ユースオイル", 0, 0, "本", "", 1326, 0, "店販"),
+        it("yay_hc5", "YAY", "", "アンドミー", 0, 0, "本", "", 1008, 0, "店販"),
+        it("yay_ny1", "ナインヤーズ", "", "cynトリートメント", 0, 0, "本", "", 10000, 0, "店販"),
+        it("yay_ny2", "ナインヤーズ", "", "ベースウォーター", 0, 0, "本", "", 1670, 0, "店販"),
+        it("yay_ny3", "ナインヤーズ", "", "yard(大)", 0, 0, "本", "", 1002.5, 0, "店販"),
+        it("yay_ny4", "ナインヤーズ", "", "yard(小)", 0, 0, "本", "", 652.3, 0, "店販"),
       ]
     ),
   },
@@ -757,6 +771,7 @@ export default function InventoryTracker() {
               : (DEFAULT_DATA[s] && DEFAULT_DATA[s].manualMonthly) || [];
           merged[s]._colorSchemeFixed = !!(parsed[s] && parsed[s]._colorSchemeFixed);
           merged[s]._importedFromLouie = !!(parsed[s] && parsed[s]._importedFromLouie);
+          merged[s]._stockParSyncedOnce = !!(parsed[s] && parsed[s]._stockParSyncedOnce);
           for (const c of CATEGORIES) {
             const fallback = (DEFAULT_DATA[s] && DEFAULT_DATA[s][c.key]) || emptyCategory();
             const existing = parsed[s] && parsed[s][c.key];
@@ -865,6 +880,75 @@ export default function InventoryTracker() {
                 }
               });
             }
+          }
+        }
+        {
+          const s = "VAN";
+          if (merged[s] && merged[s].straight) {
+            const vanStraight = merged[s].straight;
+            let kf = vanStraight.makers.find((mm) => mm.name === "ケラフェクト");
+            if (!kf) {
+              kf = mk("ケラフェクト", ["1剤", "2剤"]);
+              vanStraight.makers.push(kf);
+              migrated = true;
+            } else {
+              ["1剤", "2剤"].forEach((t) => {
+                if (!kf.types.includes(t)) {
+                  kf.types.push(t);
+                  migrated = true;
+                }
+              });
+            }
+            const kfItems = [
+              { id: "kf8", type: "1剤", name: "ケラフェクト8", price: 6120 },
+              { id: "kf65", type: "1剤", name: "ケラフェクト6.5", price: 6120 },
+              { id: "kf55", type: "1剤", name: "ケラフェクト5.5", price: 6120 },
+              { id: "kf45", type: "1剤", name: "ケラフェクト4.5", price: 6120 },
+              { id: "kf0", type: "1剤", name: "ケラフェクト0", price: 4500 },
+              { id: "kfgconk", type: "1剤", name: "ケラフェクトG-コンク", price: 4950 },
+              { id: "kf2zai", type: "2剤", name: "ケラフェクト2剤", price: 3420 },
+            ];
+            kfItems.forEach((ki) => {
+              if (!vanStraight.items.some((i) => i.maker === "ケラフェクト" && i.name === ki.name)) {
+                vanStraight.items.push({
+                  id: ki.id,
+                  maker: "ケラフェクト",
+                  type: ki.type,
+                  name: ki.name,
+                  stock: 2,
+                  par: 2,
+                  unit: "本",
+                  color: "",
+                  price: ki.price,
+                  used: 0,
+                  usedGyomu: 0,
+                  usedTenhan: 0,
+                  usage: "業務",
+                });
+                migrated = true;
+              }
+            });
+          }
+        }
+        {
+          const alreadyStockSynced = !!(merged.VAN && merged.VAN._stockParSyncedOnce);
+          if (!alreadyStockSynced) {
+            STORES.forEach((s) => {
+              CATEGORIES.forEach((c) => {
+                const catData = merged[s] && merged[s][c.key];
+                if (!catData) return;
+                catData.items.forEach((i) => {
+                  if ((i.par || 0) === 0) {
+                    i.par = 2;
+                    i.stock = 2;
+                  } else {
+                    i.stock = i.par;
+                  }
+                });
+              });
+            });
+            if (merged.VAN) merged.VAN._stockParSyncedOnce = true;
+            migrated = true;
           }
         }
         {
@@ -1689,6 +1773,117 @@ export default function InventoryTracker() {
             migrated = true;
           }
         }
+        {
+          const hoyuAdditions = [
+            { type: "プロマスター", before: "N-9/8", codes: ["N-10/12", "N-10/10"] },
+            { type: "プロマスター", before: "MT-9/8", codes: ["MT-10/12", "MT-10/10"] },
+            { type: "プロマスター", after: "C-7/7", codes: ["C-6/5"] },
+            { type: "ピグメント", after: "M-8P", codes: ["M-7P", "M-6P"] },
+            { type: "ピグメント", before: "E CR-7P", codes: ["E CP-9P"] },
+            { type: "ピグメント", before: "E CP-9P", codes: ["V-9P", "V-8P", "V-7P", "V-6P", "E BR6P", "E BR-4P"] },
+            { type: "ピグメント", after: "E CR-7P", codes: ["E NA-3P"] },
+            { type: "ピグメント", after: "CB-5P", codes: ["SV6P"] },
+            { type: "プロマスタートナーオン", append: true, codes: ["A-T7"] },
+            { type: "アプリエ", after: "LA-13", codes: ["LA-15"] },
+            { type: "アプリエ", after: "SG-13", codes: ["SG-15"] },
+            { type: "PMアプリエミドル", after: "BE9", codes: ["BE7", "BE5"] },
+            { type: "PMアプリエミドル", after: "MA9", codes: ["MA7"] },
+            { type: "PMアプリエミドル", before: "LA9", codes: ["BA9", "BA7", "BA6"] },
+            { type: "PMアプリエグロー", after: "CO G10", codes: ["CO G11"] },
+            { type: "PMアプリエグロー", after: "SM G9", codes: ["SM G11"] },
+            { type: "PMアプリエグロー", after: "SO L9", codes: ["SO L11"] },
+          ];
+          for (const s of STORES) {
+            const colorCat = merged[s].color;
+            let changed = false;
+            for (const add of hoyuAdditions) {
+              const missing = add.codes.filter(
+                (code) =>
+                  !colorCat.items.some(
+                    (i) => i.maker === "hoyu" && i.type === add.type && i.name === code
+                  )
+              );
+              if (missing.length === 0) continue;
+              const newItems = missing.map((code) =>
+                it(
+                  "hy2_" + add.type + "_" + code.replace(/[^a-zA-Z0-9]/g, ""),
+                  "hoyu",
+                  add.type,
+                  code,
+                  0,
+                  0,
+                  "本",
+                  "",
+                  code === "PCパウダー" ? 3150 : 525
+                )
+              );
+              if (add.append) {
+                colorCat.items.push(...newItems);
+              } else {
+                const refName = add.before || add.after;
+                const refIdx = colorCat.items.findIndex(
+                  (i) => i.maker === "hoyu" && i.type === add.type && i.name === refName
+                );
+                if (refIdx === -1) {
+                  colorCat.items.push(...newItems);
+                } else {
+                  const insertAt = add.before ? refIdx : refIdx + 1;
+                  colorCat.items.splice(insertAt, 0, ...newItems);
+                }
+              }
+              changed = true;
+            }
+            if (changed) migrated = true;
+          }
+        }
+        {
+          for (const s of STORES) {
+            const straightCatR = merged[s].straight;
+            if (!straightCatR) continue;
+            const gaItem = straightCatR.items.find(
+              (i) => i.maker === "華凛" && i.type === "ジーニアス" && i.name === "GA6"
+            );
+            if (gaItem) {
+              gaItem.name = "CA6";
+              migrated = true;
+            }
+          }
+        }
+        {
+          const priceFixes = [
+            { cat: "shampoo", maker: "YAY", name: "ボタニカルケアシャンプー 300ml", price: 1509 },
+            { cat: "shampoo", maker: "YAY", name: "ボタニカルケアシャンプー 500ml", price: 1830 },
+            { cat: "shampoo", maker: "YAY", name: "ボタニカルケアシャンプー 業務用1000ml", price: 3440 },
+            { cat: "shampoo", maker: "YAY", name: "ダメージケアシャンプー 300ml", price: 1569 },
+            { cat: "shampoo", maker: "YAY", name: "ダメージケアシャンプー 500ml", price: 1940 },
+            { cat: "shampoo", maker: "YAY", name: "ダメージケアシャンプー 業務用1000ml", price: 3640 },
+            { cat: "conditioner", maker: "YAY", name: "ボタニカルケアコンディショナー 300ml", price: 1479 },
+            { cat: "conditioner", maker: "YAY", name: "ボタニカルケアコンディショナー 500ml", price: 1780 },
+            { cat: "conditioner", maker: "YAY", name: "ボタニカルケアコンディショナー 業務用1000ml", price: 3260 },
+            { cat: "conditioner", maker: "YAY", name: "ダメージコンディショナー 300ml", price: 1479 },
+            { cat: "conditioner", maker: "YAY", name: "ダメージコンディショナー 500ml", price: 1780 },
+            { cat: "conditioner", maker: "YAY", name: "ダメージコンディショナー 業務用1000ml", price: 3260 },
+            { cat: "haircare", maker: "YAY", name: "ジェルオイル", price: 1006 },
+            { cat: "haircare", maker: "YAY", name: "ユースオイル", price: 1326 },
+            { cat: "haircare", maker: "YAY", name: "アンドミー", price: 1008 },
+            { cat: "haircare", maker: "ナインヤーズ", name: "cynトリートメント", price: 10000 },
+            { cat: "haircare", maker: "ナインヤーズ", name: "ベースウォーター", price: 1670 },
+            { cat: "haircare", maker: "ナインヤーズ", name: "yard(大)", price: 1002.5 },
+            { cat: "haircare", maker: "ナインヤーズ", name: "yard(小)", price: 652.3 },
+            { cat: "color", maker: "MILBON", name: "エノグ オフブラック", price: 525 },
+          ];
+          for (const s of STORES) {
+            for (const fix of priceFixes) {
+              const cat2 = merged[s] && merged[s][fix.cat];
+              if (!cat2) continue;
+              const item = cat2.items.find((i) => i.maker === fix.maker && i.name === fix.name);
+              if (item && item.price !== fix.price) {
+                item.price = fix.price;
+                migrated = true;
+              }
+            }
+          }
+        }
         setData(merged);
         setDiagInfo(
           `parsedKeys=${JSON.stringify(Object.keys(parsed))} ` +
@@ -1952,6 +2147,35 @@ export default function InventoryTracker() {
     persist(next);
   }
 
+  function moveItem(id, direction) {
+    const next = structuredClone(data);
+    const catData = next[store][category];
+    const items = catData.items;
+    const makerObj = catData.makers.find((m) => m.name === activeMaker) || null;
+    const mTypes = makerObj ? makerObj.types : [];
+    const hasOrphan =
+      makerObj &&
+      items.some((i) => i.maker === activeMaker && (!i.type || !mTypes.includes(i.type)));
+    const availTypes = mTypes.length > 0 ? [...mTypes, ...(hasOrphan ? [""] : [])] : [];
+    const matchIdx = [];
+    items.forEach((i, idx) => {
+      if (i.maker !== activeMaker) return;
+      if (availTypes.length > 0 && i.type !== activeType) return;
+      matchIdx.push(idx);
+    });
+    const fullIdx = items.findIndex((i) => i.id === id);
+    const pos = matchIdx.indexOf(fullIdx);
+    if (pos === -1) return;
+    const swapWith = direction === "up" ? pos - 1 : pos + 1;
+    if (swapWith < 0 || swapWith >= matchIdx.length) return;
+    const idxA = matchIdx[pos];
+    const idxB = matchIdx[swapWith];
+    const tmp = items[idxA];
+    items[idxA] = items[idxB];
+    items[idxB] = tmp;
+    persist(next);
+  }
+
   function toggleItemUsage(id) {
     const next = structuredClone(data);
     const item = next[store][category].items.find((i) => i.id === id);
@@ -2037,12 +2261,7 @@ export default function InventoryTracker() {
   }
 
   function isDualUseItem(item) {
-    return (
-      item.maker === "YAY" ||
-      item.maker === "ナインヤーズ" ||
-      item.type === "エトラス" ||
-      item.type === "ナイン"
-    );
+    return item.maker === "YAY" || item.maker === "ナインヤーズ";
   }
 
   function adjustStockDual(id, usageType) {
@@ -2096,14 +2315,49 @@ export default function InventoryTracker() {
     setPreviewOrder({ items, categoryLabel: catMeta.label, date: recordDate, total, confirmed: false });
   }
 
+  function openSupplierWideOrderPreview() {
+    const usedItems = getSupplierUsedItems(store);
+    const items = usedItems.map((i) => {
+      const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0);
+      return {
+        maker: i.maker,
+        type: i.type,
+        name: i.name,
+        qty,
+        unit: i.unit,
+        price: i.price || 0,
+        subtotal: qty * (i.price || 0),
+        categoryLabel: i.categoryLabel,
+      };
+    });
+    const total = items.reduce((s, i) => s + i.subtotal, 0);
+    setPreviewOrder({ items, categoryLabel: `${store}　全カテゴリまとめ`, date: recordDate, total, confirmed: false, wide: true });
+  }
+
   function openHistoryPreview(r) {
     const items = r.items.map((i) => ({ ...i, subtotal: i.qty * (i.price || 0) }));
     setPreviewOrder({ items, categoryLabel: r.categoryLabel, date: r.date, total: r.total, confirmed: true });
   }
 
+  function groupOrderItemsByCategory(items, fallbackLabel) {
+    const groups = [];
+    const byLabel = {};
+    items.forEach((i) => {
+      const label = i.categoryLabel || fallbackLabel || "品目";
+      if (!byLabel[label]) {
+        byLabel[label] = { label, items: [], subtotal: 0 };
+        groups.push(byLabel[label]);
+      }
+      byLabel[label].items.push(i);
+      byLabel[label].subtotal += i.qty * (i.price || 0);
+    });
+    return groups;
+  }
+
   function buildOrderMailto(items, categoryLabel, date) {
     const lines = items.map(
-      (i) => `${i.maker}${i.type ? "・" + i.type : ""}・${i.name}　${i.qty}${i.unit}`
+      (i) =>
+        `${i.categoryLabel ? `[${i.categoryLabel}] ` : ""}${i.maker}${i.type ? "・" + i.type : ""}・${i.name}　${i.qty}${i.unit}`
     );
     const subject = `発注書 ${store} ${categoryLabel} ${date}`;
     const body = `【発注書】${store}　${categoryLabel}　${date}\n\n${lines.join("\n")}`;
@@ -2231,7 +2485,9 @@ export default function InventoryTracker() {
       const catData = data[store][c.key];
       if (!catData) return;
       catData.items.forEach((i) => {
-        if ((i.used || 0) > 0 && supplierForMaker(i.maker) === supplier) {
+        const hasUsage =
+          (i.used || 0) > 0 || (i.usedGyomu || 0) > 0 || (i.usedTenhan || 0) > 0;
+        if (hasUsage && supplierForMaker(i.maker) === supplier) {
           results.push({ ...i, categoryKey: c.key, categoryLabel: c.label });
         }
       });
@@ -2242,16 +2498,19 @@ export default function InventoryTracker() {
   function confirmSupplierOrder(supplier) {
     const items = getSupplierUsedItems(supplier);
     if (items.length === 0) return;
-    const recordItems = items.map((i) => ({
-      maker: i.maker,
-      type: i.type,
-      name: i.name,
-      qty: i.used,
-      unit: i.unit,
-      price: i.price || 0,
-      subtotal: i.used * (i.price || 0),
-      categoryLabel: i.categoryLabel,
-    }));
+    const recordItems = items.map((i) => {
+      const qty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0);
+      return {
+        maker: i.maker,
+        type: i.type,
+        name: i.name,
+        qty,
+        unit: i.unit,
+        price: i.price || 0,
+        subtotal: qty * (i.price || 0),
+        categoryLabel: i.categoryLabel,
+      };
+    });
     const total = recordItems.reduce((sum, i) => sum + i.subtotal, 0);
     const next = structuredClone(data);
     if (!Array.isArray(next[store].orderHistory)) next[store].orderHistory = [];
@@ -2270,7 +2529,12 @@ export default function InventoryTracker() {
     });
     Object.keys(orderedByCategory).forEach((ck) => {
       next[store][ck].items.forEach((i) => {
-        if (orderedByCategory[ck].has(i.id)) i.used = 0;
+        if (orderedByCategory[ck].has(i.id)) {
+          i.used = 0;
+          i.usedGyomu = 0;
+          i.usedTenhan = 0;
+          i.stock = i.par;
+        }
       });
     });
     persist(next);
@@ -2337,11 +2601,10 @@ export default function InventoryTracker() {
     const orderedIds = new Set(items.map((i) => i.id));
     next[store][category].items.forEach((i) => {
       if (orderedIds.has(i.id)) {
-        const orderedQty = (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0);
         i.used = 0;
         i.usedGyomu = 0;
         i.usedTenhan = 0;
-        i.stock = i.stock + orderedQty;
+        i.stock = i.par;
       }
     });
     persist(next);
@@ -2489,6 +2752,13 @@ export default function InventoryTracker() {
             </button>
           ))}
         </div>
+        <button
+          onClick={openSupplierWideOrderPreview}
+          className="mt-3 w-full py-2.5 rounded-lg bg-[#F5F3EF] text-[#232323] text-sm font-medium flex items-center justify-center gap-2"
+        >
+          <Mail size={15} />
+          {store} 全体の発注書を作る
+        </button>
         <button
           onClick={() => setShowHistory((v) => !v)}
           className="mt-3 text-[11px] font-mono text-[#C9C9C9] underline underline-offset-2"
@@ -2793,44 +3063,8 @@ export default function InventoryTracker() {
                 <span className="text-[#232323]">合計</span>
                 <span style={{ color: catMeta.accent }}>¥{reorderTotal.toLocaleString()}</span>
               </div>
-              <button
-                onClick={openLiveOrderPreview}
-                className="w-full mt-2 py-2 rounded-lg border text-[12px] font-medium"
-                style={{ borderColor: catMeta.accent, color: catMeta.accent }}
-              >
-                発注書 全体を確認する
-              </button>
-              <div className="flex items-center gap-2 pt-2">
-                <input
-                  type="date"
-                  value={recordDate}
-                  onChange={(e) => setRecordDate(e.target.value)}
-                  className="flex-1 px-2 py-1.5 text-[12px] font-mono rounded-lg border border-[#E4E0D6] outline-none"
-                />
-                <a
-                  href={buildOrderMailto(
-                    reorderItems.map((i) => ({
-                      maker: i.maker,
-                      type: i.type,
-                      name: i.name,
-                      qty: (i.used || 0) + (i.usedGyomu || 0) + (i.usedTenhan || 0),
-                      unit: i.unit,
-                      price: i.price || 0,
-                    })),
-                    catMeta.label,
-                    recordDate
-                  )}
-                  className="w-9 h-9 rounded-lg border border-[#E4E0D6] flex items-center justify-center text-[#5A5A5A] shrink-0"
-                >
-                  <Mail size={15} />
-                </a>
-                <button
-                  onClick={confirmOrder}
-                  className="px-3 py-1.5 rounded-lg text-[12px] font-medium text-white shrink-0"
-                  style={{ background: catMeta.accent }}
-                >
-                  この内容で発注記録
-                </button>
+              <div className="mt-2 pt-2 text-[11px] font-mono text-[#9A9A9A] text-center">
+                発注書は「{store} 全体の発注書を作る」からまとめて作成してください
               </div>
             </div>
           )}
@@ -2998,7 +3232,7 @@ export default function InventoryTracker() {
 
           <div className="flex flex-wrap gap-1.5">
             {availableTypeValues.map((t) => {
-              const label = t === "" ? "未分類" : t;
+              const label = t === "" ? "未分類" : SERIES_DISPLAY_LABELS[t] || t;
               const isActiveT = activeType === t;
               const typeItems = categoryData.items.filter((i) => i.maker === activeMaker && i.type === t);
 
@@ -3110,7 +3344,7 @@ export default function InventoryTracker() {
               {visibleItems.length === 0 && (
                 <div className="text-center text-[#999] text-sm py-6 font-mono">
                   {activeMaker}
-                  {availableTypeValues.length > 0 ? `（${activeType === "" ? "未分類" : activeType}）` : ""}
+                  {availableTypeValues.length > 0 ? `（${activeType === "" ? "未分類" : (SERIES_DISPLAY_LABELS[activeType] || activeType)}）` : ""}
                   の品目はまだありません
                 </div>
               )}
@@ -3276,6 +3510,20 @@ export default function InventoryTracker() {
                             </button>
                           </>
                         )}
+                        <div className="flex flex-col ml-1">
+                          <button
+                            onClick={() => moveItem(item.id, "up")}
+                            className="w-6 h-5 flex items-center justify-center text-[#9A9A9A] active:scale-95"
+                          >
+                            <ChevronDown size={13} style={{ transform: "rotate(180deg)" }} />
+                          </button>
+                          <button
+                            onClick={() => moveItem(item.id, "down")}
+                            className="w-6 h-5 flex items-center justify-center text-[#9A9A9A] active:scale-95"
+                          >
+                            <ChevronDown size={13} />
+                          </button>
+                        </div>
                         <button
                           onClick={() => deleteItem(item.id)}
                           className="w-6 h-6 flex items-center justify-center text-[#C7A9A0] ml-1"
@@ -3363,7 +3611,7 @@ export default function InventoryTracker() {
                 >
                   <Plus size={15} />
                   {activeMaker}
-                  {availableTypeValues.length > 0 ? `（${activeType === "" ? "未分類" : activeType}）` : ""}
+                  {availableTypeValues.length > 0 ? `（${activeType === "" ? "未分類" : (SERIES_DISPLAY_LABELS[activeType] || activeType)}）` : ""}
                   に品目を追加
                 </button>
               )}
@@ -3400,19 +3648,33 @@ export default function InventoryTracker() {
                 </span>
               </div>
 
-              <div className="space-y-2 mb-4">
-                {previewOrder.items.map((i, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-[12px] font-mono border-b border-[#F0EEE7] pb-2">
-                    <span className="text-[#5A5A5A] flex-1 min-w-0 pr-2">
-                      {i.maker}
-                      {i.type ? `・${i.type}` : ""}
-                      <br />
-                      <span className="text-[#232323] text-[13px]">{i.name}</span>
-                    </span>
-                    <span className="text-[#232323] text-right shrink-0 text-[14px] font-semibold">
-                      {i.qty}
-                      {i.unit}
-                    </span>
+              <div className="space-y-4 mb-4">
+                {groupOrderItemsByCategory(previewOrder.items, previewOrder.categoryLabel).map((group) => (
+                  <div key={group.label}>
+                    <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-[#E4E0D6]">
+                      <span className="text-[11px] font-mono uppercase tracking-wider text-[#8A7355] font-semibold">
+                        {group.label}
+                      </span>
+                      <span className="text-[11px] font-mono text-[#9A9A9A]">
+                        ¥{group.subtotal.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {group.items.map((i, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-[12px] font-mono border-b border-[#F0EEE7] pb-2">
+                          <span className="text-[#5A5A5A] flex-1 min-w-0 pr-2">
+                            {i.maker}
+                            {i.type ? `・${i.type}` : ""}
+                            <br />
+                            <span className="text-[#232323] text-[13px]">{i.name}</span>
+                          </span>
+                          <span className="text-[#232323] text-right shrink-0 text-[14px] font-semibold">
+                            {i.qty}
+                            {i.unit}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -3424,6 +3686,17 @@ export default function InventoryTracker() {
                 >
                   <Mail size={14} /> メールで送る
                 </a>
+                {previewOrder.wide && !previewOrder.confirmed && (
+                  <button
+                    onClick={() => {
+                      confirmSupplierOrder(store);
+                      setPreviewOrder(null);
+                    }}
+                    className="px-4 py-2.5 rounded-lg bg-[#8A7355] text-white text-[13px] font-medium"
+                  >
+                    確定する
+                  </button>
+                )}
                 <button
                   onClick={() => setPreviewOrder(null)}
                   className="px-4 py-2.5 rounded-lg bg-[#232323] text-white text-[13px] font-medium"
@@ -3437,4 +3710,8 @@ export default function InventoryTracker() {
       )}
     </div>
   );
+}
+
+export async function getServerSideProps() {
+  return { props: {} };
 }
