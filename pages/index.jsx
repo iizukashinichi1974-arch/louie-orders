@@ -45,6 +45,7 @@ const SUPPLIERS = ["VAN", "ガモウ", "ダリア", "YAY", "ハーツ", "グロ�
 const SUPPLIER_CATEGORY_KEYS = {
   YAY: ["shampoo", "conditioner", "haircare"],
   ハーツ: ["straight", "digitalperm", "processing"],
+  グローバルミルボン: ["shampoo", "conditioner"],
   TOKIO: ["treatment_pro", "tokio_pro_shampoo", "tokio_pro_conditioner", "tokio_retail_shampoo", "tokio_retail_conditioner", "treatment_retail"],
 };
 
