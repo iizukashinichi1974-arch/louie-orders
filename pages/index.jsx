@@ -771,7 +771,7 @@ export default function InventoryTracker() {
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
           const { data: row, error } = await supabase
-            .from("oorder_orders")
+            .from("louie_orders")
             .select("data, updated_at")
             .eq("id", "main")
             .maybeSingle();
@@ -2064,12 +2064,12 @@ export default function InventoryTracker() {
         let res;
         if (base === null) {
           res = await supabase
-            .from("oorder_orders")
+            .from("louie_orders")
             .insert({ id: "main", data: next, updated_at: newVer })
             .select("updated_at");
         } else {
           res = await supabase
-            .from("oorder_orders")
+            .from("louie_orders")
             .update({ data: next, updated_at: newVer })
             .eq("id", "main")
             .eq("updated_at", base)
@@ -2084,7 +2084,7 @@ export default function InventoryTracker() {
         }
         // 0件更新（または既に存在）＝ 版が合わない。通信の取りこぼしで自分の保存が既に届いていたかを確認する
         const { data: latest, error: e2 } = await supabase
-          .from("oorder_orders")
+          .from("louie_orders")
           .select("updated_at")
           .eq("id", "main")
           .maybeSingle();
@@ -2127,7 +2127,7 @@ export default function InventoryTracker() {
       if (serverVersionRef.current === null) return;
       try {
         const { data: row, error } = await supabase
-          .from("oorder_orders")
+          .from("louie_orders")
           .select("updated_at")
           .eq("id", "main")
           .maybeSingle();
@@ -2924,7 +2924,7 @@ export default function InventoryTracker() {
       <div className="bg-[#232323] text-[#F5F3EF] px-5 pt-6 pb-4">
         <div className="flex items-center gap-2 mb-4">
           <Package size={20} strokeWidth={1.5} />
-          <h1 className="text-lg tracking-wide font-serif">OORDER 発注管理</h1>
+          <h1 className="text-lg tracking-wide font-serif">LOUIE 発注管理</h1>
           <span className="ml-auto text-[11px] text-[#9A9A9A] font-mono">
             {saving ? "保存中…" : loadError ? "保存エラー" : "同期済み"}
           </span>
